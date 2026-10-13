@@ -124,15 +124,14 @@ export default function HomeHero({ onOpenAuth, onExploreSimulator }) {
             <span>CYBER INTELLIGENCE 2.0 • AI DEFENSE</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight">
-            Stop Cyber Scams <br />
-            Before They Steal Your <br />
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight tracking-tight">
+            Next-Gen Threat Intelligence to <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-emerald-300 to-cyan-400">
-              Money & Peace of Mind.
+              Detect, Expose & Neutralize Cyber Scams Before Financial Loss.
             </span>
           </h1>
 
-          <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-xl">
+          <p className="text-gray-300 text-sm sm:text-base leading-relaxed max-w-xl">
             ScamRadar combines <strong>Gemini 2.5 Multimodal Vision</strong> and <strong>Speech-to-Text Neural Inspection</strong> to detect digital arrest extortion, fake UPI payment QR codes, Telegram job frauds, and deepfake voice scams in seconds.
           </p>
 
@@ -153,14 +152,6 @@ export default function HomeHero({ onOpenAuth, onExploreSimulator }) {
               <i className="fa-solid fa-shield-halved text-accent text-base"></i>
               <span>Admin SOC Portal</span>
             </button>
-
-            <a
-              href="#scam-simulator"
-              className="text-gray-400 hover:text-white font-medium text-xs flex items-center justify-center gap-1.5 transition py-2"
-            >
-              <span>Explore 3D Simulator</span>
-              <i className="fa-solid fa-arrow-down text-accent text-[10px]"></i>
-            </a>
           </div>
 
           {/* Key Assurance Indicators */}

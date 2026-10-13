@@ -316,23 +316,6 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
             <span>{isLoginMode ? `Sign In as ${selectedRole.toUpperCase()}` : `Register as ${selectedRole.toUpperCase()}`}</span>
           </button>
         </form>
-
-        {/* 1-Click Demo Credentials Pill */}
-        <div className="mt-4 p-3 bg-darkbg/90 rounded-xl border border-gray-800 text-[11px] text-gray-400 flex items-center justify-between">
-          <div>
-            <span className="font-bold text-gray-300">Quick Test Credentials:</span>
-            <div className="text-[10px] text-gray-500 font-mono mt-0.5">
-              {selectedRole === 'admin' ? 'admin@scamradar.com (admin123)' : 'user@enterprise.com (user123)'}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => applyDemoCredentials(selectedRole)}
-            className="text-[10px] font-bold text-accent hover:underline bg-accent/10 px-2 py-1 rounded border border-accent/20 cursor-pointer whitespace-nowrap"
-          >
-            Autofill {selectedRole === 'admin' ? 'Admin' : 'User'}
-          </button>
-        </div>
         
         {/* Toggle Mode */}
         <div className="mt-5 text-center text-xs text-gray-400 border-t border-gray-800/80 pt-3.5">
