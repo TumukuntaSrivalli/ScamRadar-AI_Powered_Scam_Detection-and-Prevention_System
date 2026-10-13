@@ -1,0 +1,14 @@
+[
+  {
+    "email": "admin@scamradar.com",
+    "password": "admin123",
+    "role": "admin",
+    "name": "System Administrator"
+  },
+  {
+    "email": "user@enterprise.com",
+    "password": "user123",
+    "role": "user",
+    "name": "Demo Enterprise User"
+  }
+]

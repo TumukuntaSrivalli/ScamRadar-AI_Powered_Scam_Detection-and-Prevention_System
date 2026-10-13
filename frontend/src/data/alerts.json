@@ -1,0 +1,26 @@
+[
+  {
+    "id": "alert-1",
+    "title": "Live Scam Alert Today: Fake Telecom SIM Block & TRAI Robocalls",
+    "description": "Automated robocalls claim your mobile SIM card will be deactivated within 2 hours by TRAI due to illegal activities. Disconnect call immediately.",
+    "category": "Telecom Vishing",
+    "actionText": "Report to CyberCell",
+    "actionUrl": "https://cybercrime.gov.in"
+  },
+  {
+    "id": "alert-2",
+    "title": "Critical Threat: Video Call Digital Arrest Impersonation",
+    "description": "Fraudsters wearing fake police uniforms demand money on WhatsApp video calls claiming your Aadhaar ID is flagged in narcotics shipping.",
+    "category": "Digital Arrest",
+    "actionText": "Read Alert Guidance",
+    "actionUrl": "https://cybercrime.gov.in"
+  },
+  {
+    "id": "alert-3",
+    "title": "Trending Trap: Fake Marketplace UPI 'Money Received' QR Scam",
+    "description": "Buyers on classified sites send QR codes claiming 'scan to receive payment'. Scanning actually debits money from your bank account.",
+    "category": "UPI QR Fraud",
+    "actionText": "Report Fraud",
+    "actionUrl": "https://cybercrime.gov.in"
+  }
+]

@@ -1,0 +1,85 @@
+[
+  {
+    "id": "art-1",
+    "title": "Digital Arrest & Fake Police Video Call Fraud",
+    "category": "Impersonation",
+    "date": "Critical Threat",
+    "risk": "Severe Loss",
+    "summary": "Scammers pose as Cyber Crime Cell or Police officers via WhatsApp video calls, claiming your ID is linked to illegal packages.",
+    "details": "Victims are intimidated over live video calls by scammers wearing fake police uniforms. They are told they are under 'Digital Arrest' and coerced into transferring funds to clear their names.",
+    "tips": [
+      "No official government agency or police force conducts arrests over video calls.",
+      "Disconnect the call immediately if anyone threatens legal action or isolation.",
+      "Report suspicious callers to cybercrime.gov.in or your local police station."
+    ]
+  },
+  {
+    "id": "art-2",
+    "title": "Telegram Part-Time YouTube Rating Trap",
+    "category": "Task Scam",
+    "date": "High Frequency",
+    "risk": "High Loss",
+    "summary": "Promises of ₹3,000/day for liking videos. Small initial payouts lure victims into paying high sums for fake VIP commission tasks.",
+    "details": "Victims receive small payouts (₹150–₹300) for simple online tasks to build trust. They are then invited into VIP Telegram groups where they must deposit large sums to unlock high-yield tasks.",
+    "tips": [
+      "Legitimate job offers never require upfront payments or deposits.",
+      "Be skeptical of unsolicited WhatsApp or Telegram job invitations.",
+      "Never transfer money to personal bank accounts for work tasks."
+    ]
+  },
+  {
+    "id": "art-3",
+    "title": "AI Family Emergency Audio Cloning",
+    "category": "AI Voice",
+    "date": "Severe Risk",
+    "risk": "Critical Risk",
+    "summary": "Cloned voice calls mimic children or parents claiming to be in police custody or emergency rooms demanding instant funds.",
+    "details": "Using 3-second voice samples scraped from social media reels, scammers generate real-time AI voice clones of family members to trick victims into wiring bail or medical money.",
+    "tips": [
+      "Hang up immediately and call your relative directly on their mobile line.",
+      "Create a secret verification keyword with family members for emergencies.",
+      "Avoid transferring money under extreme pressure or panic."
+    ]
+  },
+  {
+    "id": "art-4",
+    "title": "Fake QR Code Money Transfer Fraud",
+    "category": "UPI Fraud",
+    "date": "Trending Today",
+    "risk": "Financial Loss",
+    "summary": "Buyers on online marketplaces send QR codes claiming 'scan to receive payment'—scanning actually deducts money from your account.",
+    "details": "Scammers pretend to purchase items listed on classified sites. They send a QR code claiming it will transfer money to the seller, but scanning it initiates a debit transaction.",
+    "tips": [
+      "UPI PINs are ONLY required to send or pay money, never to receive it.",
+      "Never scan a QR code sent by an unknown buyer.",
+      "Verify payments through your official banking app balance."
+    ]
+  },
+  {
+    "id": "art-5",
+    "title": "Electricity Bill Suspension SMS Trap",
+    "category": "Utility Fraud",
+    "date": "Active Threat",
+    "risk": "Moderate Risk",
+    "summary": "Fake SMS notices warn that your power connection will be cut at 9:30 PM tonight due to unpaid bills.",
+    "details": "Messages direct victims to call a fake helpline number. The scammer instructs the victim to download a remote-access app (e.g., AnyDesk) to update bill details, compromising their phone.",
+    "tips": [
+      "Utility companies never send personal mobile numbers for bill payments.",
+      "Never download remote management apps at the request of an unknown caller.",
+      "Pay bills only through official utility portals or bank apps."
+    ]
+  },
+  {
+    "id": "art-6",
+    "title": "Customs & International Courier Fraud",
+    "category": "Courier Trap",
+    "date": "Active Threat",
+    "risk": "Financial Loss",
+    "summary": "Automated IVR calls warn that an international parcel in your name was seized containing illegal drugs or passports.",
+    "details": "Calls are transferred to fake customs officers who demand clearance fees or bribery payments to prevent criminal charges.",
+    "tips": [
+      "Track parcels directly on official courier websites (FedEx, DHL, India Post).",
+      "Customs officials do not demand instant online bank transfers to clear packages."
+    ]
+  }
+]

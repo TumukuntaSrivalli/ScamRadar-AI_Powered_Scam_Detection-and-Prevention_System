@@ -1,0 +1,33 @@
+[
+  {
+    "id": "REP-8921",
+    "userEmail": "user@enterprise.com",
+    "fileName": "whatsapp_payment_demand.png",
+    "fileType": "image",
+    "date": "2026-09-22 14:10",
+    "isScam": true,
+    "confidenceScore": 94,
+    "category": "Digital Arrest Fraud",
+    "transcript": "Urgent notice: Cyber Crime Cell has frozen your account. Pay Rs 50,000 immediately.",
+    "recommendations": [
+      "No police officer demands money over WhatsApp.",
+      "Do not transfer funds; block the sender immediately.",
+      "Report to cybercrime.gov.in."
+    ]
+  },
+  {
+    "id": "REP-8922",
+    "userEmail": "user@enterprise.com",
+    "fileName": "telecom_sim_call.mp3",
+    "fileType": "audio",
+    "date": "2026-09-21 18:45",
+    "isScam": true,
+    "confidenceScore": 88,
+    "category": "Voice Phishing (Vishing)",
+    "transcript": "Your SIM card will be deactivated in 2 hours. Press 1 to speak with customer support.",
+    "recommendations": [
+      "Telecom operators do not make automated disconnection threats.",
+      "Never share OTP or personal identification numbers."
+    ]
+  }
+]

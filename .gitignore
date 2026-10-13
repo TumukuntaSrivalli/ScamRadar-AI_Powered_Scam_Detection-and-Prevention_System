@@ -1,0 +1,26 @@
+# Node & Vite
+node_modules/
+frontend/node_modules/
+.npm
+dist-ssr
+*.local
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+
+# Vercel
+.vercel/
+
+# Environment variables
+.env
+.env.local
+
+# OS Files
+Thumbs.db
+.DS_Store
