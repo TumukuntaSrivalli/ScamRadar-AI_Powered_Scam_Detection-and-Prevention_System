@@ -18,8 +18,8 @@ export default function FileUploadSuccessModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className="bg-panelbg border border-accent/40 rounded-2xl shadow-[0_0_50px_rgba(16,185,129,0.25)] p-6 sm:p-8 w-full max-w-md relative text-left font-sans transform transition-all scale-100">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-panelbg border border-accent/40 rounded-2xl shadow-[0_0_50px_rgba(16,185,129,0.25)] p-5 sm:p-8 w-full max-w-md max-h-[92vh] overflow-y-auto relative text-left font-sans transform transition-all scale-100">
         {/* Close Button */}
         <button 
           onClick={onClose} 

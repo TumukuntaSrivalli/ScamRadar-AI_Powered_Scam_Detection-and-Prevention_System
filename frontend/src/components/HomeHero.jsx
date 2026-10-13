@@ -137,10 +137,10 @@ export default function HomeHero({ onOpenAuth, onExploreSimulator }) {
           </p>
 
           {/* Call to Actions */}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
             <button
               onClick={() => onOpenAuth('user')}
-              className="bg-accent hover:bg-accenthover text-darkbg font-extrabold px-7 py-3.5 rounded-xl shadow-[0_0_25px_rgba(16,185,129,0.35)] transition-all hover:scale-105 active:scale-95 flex items-center gap-2.5 text-sm cursor-pointer"
+              className="bg-accent hover:bg-accenthover text-darkbg font-extrabold px-6 py-3.5 rounded-xl shadow-[0_0_25px_rgba(16,185,129,0.35)] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2.5 text-sm cursor-pointer w-full sm:w-auto"
             >
               <i className="fa-solid fa-radar text-base"></i>
               <span>Launch AI Scanner</span>
@@ -148,7 +148,7 @@ export default function HomeHero({ onOpenAuth, onExploreSimulator }) {
 
             <button
               onClick={() => onOpenAuth('admin')}
-              className="bg-panelcard/80 hover:bg-gray-800 text-white font-bold px-6 py-3.5 rounded-xl border border-gray-700/80 transition-all hover:border-accent text-sm flex items-center gap-2.5 cursor-pointer shadow-lg"
+              className="bg-panelcard/80 hover:bg-gray-800 text-white font-bold px-5 py-3.5 rounded-xl border border-gray-700/80 transition-all hover:border-accent text-sm flex items-center justify-center gap-2.5 cursor-pointer shadow-lg w-full sm:w-auto"
             >
               <i className="fa-solid fa-shield-halved text-accent text-base"></i>
               <span>Admin SOC Portal</span>
@@ -156,7 +156,7 @@ export default function HomeHero({ onOpenAuth, onExploreSimulator }) {
 
             <a
               href="#scam-simulator"
-              className="text-gray-400 hover:text-white font-medium text-xs flex items-center gap-1.5 transition ml-2 py-2"
+              className="text-gray-400 hover:text-white font-medium text-xs flex items-center justify-center gap-1.5 transition py-2"
             >
               <span>Explore 3D Simulator</span>
               <i className="fa-solid fa-arrow-down text-accent text-[10px]"></i>
@@ -164,18 +164,18 @@ export default function HomeHero({ onOpenAuth, onExploreSimulator }) {
           </div>
 
           {/* Key Assurance Indicators */}
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-800/80">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-4 border-t border-gray-800/80 text-center sm:text-left">
             <div>
-              <div className="text-2xl font-black text-white font-mono">99.4%</div>
-              <div className="text-[11px] text-gray-400">Detection Accuracy</div>
+              <div className="text-xl sm:text-2xl font-black text-white font-mono">99.4%</div>
+              <div className="text-[10px] sm:text-[11px] text-gray-400">Detection Accuracy</div>
             </div>
             <div>
-              <div className="text-2xl font-black text-accent font-mono">&lt; 1.5s</div>
-              <div className="text-[11px] text-gray-400">Neural Analysis Time</div>
+              <div className="text-xl sm:text-2xl font-black text-accent font-mono">&lt; 1.5s</div>
+              <div className="text-[10px] sm:text-[11px] text-gray-400">Neural Speed</div>
             </div>
             <div>
-              <div className="text-2xl font-black text-cyan-400 font-mono">250K+</div>
-              <div className="text-[11px] text-gray-400">Vectors Neutralized</div>
+              <div className="text-xl sm:text-2xl font-black text-cyan-400 font-mono">250K+</div>
+              <div className="text-[10px] sm:text-[11px] text-gray-400">Threats Stopped</div>
             </div>
           </div>
         </div>
@@ -312,7 +312,7 @@ export default function HomeHero({ onOpenAuth, onExploreSimulator }) {
         </div>
 
         {/* Scenario Selectors */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
           {Object.entries(scamDemos).map(([key, demo]) => {
             const isActive = selectedDemo === key;
             return (

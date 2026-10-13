@@ -11,18 +11,18 @@ export default function RadarGlobe3D() {
     const ctx = canvas.getContext('2d');
     let animationFrameId;
 
-    let width = (canvas.width = canvas.offsetWidth || 500);
-    let height = (canvas.height = canvas.offsetHeight || 500);
+    let width = (canvas.width = canvas.offsetWidth || 340);
+    let height = (canvas.height = canvas.offsetHeight || 340);
 
     const handleResize = () => {
       if (!canvas) return;
-      width = canvas.width = canvas.offsetWidth || 500;
-      height = canvas.height = canvas.offsetHeight || 500;
+      width = canvas.width = canvas.offsetWidth || 340;
+      height = canvas.height = canvas.offsetHeight || 340;
     };
     window.addEventListener('resize', handleResize);
 
     // 3D Sphere Points
-    const numPoints = 160;
+    const numPoints = 140;
     const points = [];
     const radius = Math.min(width, height) * 0.38;
 
@@ -33,7 +33,7 @@ export default function RadarGlobe3D() {
         x: radius * Math.sin(theta) * Math.cos(phi),
         y: radius * Math.sin(theta) * Math.sin(phi),
         z: radius * Math.cos(theta),
-        size: Math.random() * 1.8 + 1,
+        size: Math.random() * 1.6 + 1,
         color: Math.random() > 0.3 ? '#10B981' : '#3B82F6',
         pulseOffset: Math.random() * Math.PI * 2
       });
@@ -54,6 +54,7 @@ export default function RadarGlobe3D() {
     let sweepAngle = 0;
     let ripples = [];
 
+    // Mouse Interaction
     const handleMouseMove = (e) => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left - width / 2;
@@ -62,18 +63,44 @@ export default function RadarGlobe3D() {
       targetRotX = -(mouseY / height) * 1.2;
     };
 
+    // Mobile Phone Touch Interaction
+    const handleTouchMove = (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const touchX = touch.clientX - rect.left - width / 2;
+      const touchY = touch.clientY - rect.top - height / 2;
+      targetRotY = (touchX / width) * 1.4;
+      targetRotX = -(touchY / height) * 1.4;
+    };
+
     const handleClick = (e) => {
       const rect = canvas.getBoundingClientRect();
       ripples.push({
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
         r: 0,
-        maxR: 90,
+        maxR: 80,
+        opacity: 0.9
+      });
+    };
+
+    const handleTouchStart = (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      ripples.push({
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+        r: 0,
+        maxR: 80,
         opacity: 0.9
       });
     };
 
     canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: true });
     canvas.addEventListener('click', handleClick);
 
     let time = 0;
@@ -150,14 +177,11 @@ export default function RadarGlobe3D() {
 
       // Sort points by Z for depth
       const projectedPoints = points.map((p) => {
-        // Rotate around Y
         const x1 = p.x * cosY - p.z * sinY;
         const z1 = p.z * cosY + p.x * sinY;
-        // Rotate around X
         const y2 = p.y * cosX - z1 * sinX;
         const z2 = z1 * cosX + p.y * sinX;
 
-        // Perspective projection
         const fov = radius * 2.4;
         const scale = fov / (fov + z2);
         return {
@@ -180,7 +204,7 @@ export default function RadarGlobe3D() {
         ctx.beginPath();
         const rRing = radius * Math.cos(latOffset * Math.PI * 0.5);
         const yBase = radius * Math.sin(latOffset * Math.PI * 0.5);
-        for (let a = 0; a <= Math.PI * 2; a += 0.2) {
+        for (let a = 0; a <= Math.PI * 2; a += 0.25) {
           const xr = rRing * Math.cos(a);
           const zr = rRing * Math.sin(a);
           const x1 = xr * cosY - zr * sinY;
@@ -222,8 +246,7 @@ export default function RadarGlobe3D() {
         const bpy = cy + by2 * scale;
 
         if (bz2 > -radius * 0.5) {
-          // Hotspot pulse
-          const pulseR = 8 + Math.sin(time * 5) * 4;
+          const pulseR = 7 + Math.sin(time * 5) * 3;
           ctx.beginPath();
           ctx.arc(bpx, bpy, pulseR, 0, Math.PI * 2);
           ctx.strokeStyle = blip.color;
@@ -231,17 +254,17 @@ export default function RadarGlobe3D() {
           ctx.stroke();
 
           ctx.beginPath();
-          ctx.arc(bpx, bpy, 3.5, 0, Math.PI * 2);
+          ctx.arc(bpx, bpy, 3, 0, Math.PI * 2);
           ctx.fillStyle = blip.color;
           ctx.shadowColor = blip.color;
-          ctx.shadowBlur = 8;
+          ctx.shadowBlur = 6;
           ctx.fill();
           ctx.shadowBlur = 0;
 
-          // Label
+          // Short responsive label for mobile
           ctx.fillStyle = '#FFFFFF';
-          ctx.font = 'bold 10px monospace';
-          ctx.fillText(blip.label, bpx + 10, bpy - 6);
+          ctx.font = 'bold 9px monospace';
+          ctx.fillText(blip.label, bpx + 8, bpy - 5);
         }
       });
 
@@ -268,13 +291,15 @@ export default function RadarGlobe3D() {
     return () => {
       window.removeEventListener('resize', handleResize);
       canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchstart', handleTouchStart);
       canvas.removeEventListener('click', handleClick);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full aspect-square max-w-[480px] mx-auto flex items-center justify-center">
+    <div ref={containerRef} className="relative w-full aspect-square max-w-[420px] mx-auto flex items-center justify-center touch-none">
       {/* Outer Glow Halo */}
       <div className="absolute inset-4 rounded-full bg-accent/5 blur-2xl pointer-events-none animate-pulse-glow"></div>
       
@@ -285,13 +310,13 @@ export default function RadarGlobe3D() {
       />
 
       {/* Floating HUD Badges */}
-      <div className="absolute top-2 left-2 z-20 bg-darkbg/85 border border-accent/30 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-mono text-accent shadow-lg flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-accent animate-ping"></span>
-        <span>AI RADAR: SCANNING 3D GRID</span>
+      <div className="absolute top-2 left-2 z-20 bg-darkbg/90 border border-accent/30 backdrop-blur-md px-2.5 py-1 rounded-lg text-[9px] sm:text-[10px] font-mono text-accent shadow-lg flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping"></span>
+        <span>RADAR: 3D GRID</span>
       </div>
 
-      <div className="absolute bottom-2 right-2 z-20 bg-darkbg/85 border border-gray-800 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-mono text-gray-300 shadow-lg">
-        <span className="text-accent font-bold">LATENCY:</span> 1.1s • <span className="text-emerald-400">STATUS: ACTIVE</span>
+      <div className="absolute bottom-2 right-2 z-20 bg-darkbg/90 border border-gray-800 backdrop-blur-md px-2.5 py-1 rounded-lg text-[9px] sm:text-[10px] font-mono text-gray-300 shadow-lg">
+        <span className="text-accent font-bold">&lt;1.2s</span> • <span className="text-emerald-400">ACTIVE</span>
       </div>
     </div>
   );

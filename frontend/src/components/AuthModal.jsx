@@ -178,8 +178,8 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
   };
 
   return (
-    <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className="bg-panelbg border border-gray-800 rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-md relative text-left font-sans">
+    <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-panelbg border border-gray-800 rounded-3xl shadow-2xl p-5 sm:p-8 w-full max-w-md max-h-[92vh] overflow-y-auto relative text-left font-sans">
         {/* Close Button */}
         <button 
           onClick={onClose} 
