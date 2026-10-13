@@ -28,9 +28,11 @@ export default function Navbar({
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         >
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-accent/15 border border-accent/40 flex items-center justify-center text-accent group-hover:scale-105 transition shadow-[0_0_15px_rgba(16,185,129,0.3)] shrink-0">
-            <i className="fa-solid fa-radar text-base sm:text-lg animate-pulse"></i>
-          </div>
+          <img 
+            src="/logo.jpg" 
+            alt="ScamRadar Logo" 
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-accent/40 shadow-[0_0_15px_rgba(16,185,129,0.35)] group-hover:scale-105 transition shrink-0" 
+          />
           <span className="font-sans">
             Scam<span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-emerald-400">Radar</span>
           </span>
