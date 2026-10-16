@@ -1,9 +1,20 @@
 // Centralized API configuration
-// In local dev (Vite): empty string '' (proxied by vite.config.js to http://127.0.0.1:8000)
-// On Vercel with Serverless Python: empty string '' (routed via vercel.json rewrite)
-// With external backend (Render, Railway, etc.): set VITE_API_URL in environment variables
-export const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL || 
-  import.meta.env.VITE_API_URL || 
-  ''
-).replace(/\/$/, '');
+// 1. Checks VITE_API_URL / VITE_API_BASE_URL (configured in Vercel settings)
+// 2. Checks localStorage('scamradar_backend_url') (allows instant configuration directly from UI)
+// 3. Defaults to '' (relative path for local proxy or serverless)
+
+export const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '';
+  if (envUrl && envUrl.trim() !== '') {
+    return envUrl.trim().replace(/\/+$/, '').replace(/\/api$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    const local = localStorage.getItem('scamradar_backend_url');
+    if (local && local.trim() !== '') {
+      return local.trim().replace(/\/+$/, '').replace(/\/api$/, '');
+    }
+  }
+  return '';
+};
+
+export const API_BASE_URL = getApiBaseUrl();

@@ -32,9 +32,43 @@ export default function AnalysisReport({
               <i className="fa-solid fa-circle-xmark"></i> Analysis Request Failed
             </h3>
             <p className="mt-1 text-gray-300 text-xs">{analysisError || "Could not connect to ScamRadar backend API."}</p>
-            <p className="mt-2 text-[11px] text-gray-400 border-t border-danger/20 pt-2 leading-relaxed">
-              <strong>Tip:</strong> If running locally, ensure your FastAPI backend is running on <code className="text-accent">http://127.0.0.1:8000</code>. If running on Vercel, ensure your backend server URL is configured via <code className="text-accent">VITE_API_URL</code> or your serverless API routes are deployed.
-            </p>
+
+            {/* Quick Live Backend Connector */}
+            <div className="mt-3 p-3 bg-panelbg/90 border border-gray-700/80 rounded-lg">
+              <label className="block text-[11px] font-semibold text-accent mb-1 flex items-center gap-1.5">
+                <i className="fa-solid fa-plug text-xs"></i> Connect Live Backend Server:
+              </label>
+              <div className="flex flex-col sm:flex-row gap-2 mt-1">
+                <input 
+                  type="url" 
+                  placeholder="https://scamradar-backend-xxxx.onrender.com" 
+                  defaultValue={typeof window !== 'undefined' ? localStorage.getItem('scamradar_backend_url') || '' : ''}
+                  id="direct-backend-url"
+                  className="flex-1 bg-darkbg border border-gray-700 focus:border-accent text-white px-3 py-1.5 rounded text-xs outline-none font-mono"
+                />
+                <button 
+                  onClick={() => {
+                    const inputEl = document.getElementById('direct-backend-url');
+                    const val = inputEl?.value?.trim();
+                    if (val) {
+                      const clean = val.replace(/\/+$/, '').replace(/\/api$/, '');
+                      localStorage.setItem('scamradar_backend_url', clean);
+                      alert('Backend URL saved! Reloading to connect...');
+                      window.location.reload();
+                    } else {
+                      localStorage.removeItem('scamradar_backend_url');
+                      window.location.reload();
+                    }
+                  }}
+                  className="bg-accent hover:bg-accenthover text-darkbg font-bold px-4 py-1.5 rounded text-xs transition whitespace-nowrap shadow-sm"
+                >
+                  Save & Retry
+                </button>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1.5">
+                Paste your Render URL above (or set <code className="text-accent">VITE_API_URL</code> in Vercel settings and redeploy).
+              </p>
+            </div>
           </div>
         )}
 

@@ -11,7 +11,7 @@ import AuthModal from './components/AuthModal';
 import BlogsModal from './components/BlogsModal';
 import ArticleModal from './components/ArticleModal';
 import ChatWidget from './components/ChatWidget';
-import { API_BASE_URL } from './apiConfig';
+import { getApiBaseUrl } from './apiConfig';
 
 import defaultUsers from './data/registered_users.json';
 import defaultReports from './data/initial_reports.json';
@@ -113,9 +113,10 @@ export default function ScamRadarApp() {
     const formData = new FormData();
     formData.append("file", selectedFile);
 
+    const baseUrl = getApiBaseUrl();
     const endpoint = selectedFileType === 'image' 
-      ? `${API_BASE_URL}/api/analyze/image` 
-      : `${API_BASE_URL}/api/analyze/audio`;
+      ? `${baseUrl}/api/analyze/image` 
+      : `${baseUrl}/api/analyze/audio`;
 
     try {
       const response = await fetch(endpoint, {
@@ -155,7 +156,7 @@ export default function ScamRadarApp() {
       setReportsList(prev => [newReport, ...prev]);
 
       // Save to backend DB without altering backend contract
-      fetch(`${API_BASE_URL}/api/reports/save`, {
+      fetch(`${baseUrl}/api/reports/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
