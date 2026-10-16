@@ -305,3 +305,33 @@ def get_reports_by_user(user_email: str):
 
     conn.close()
     return reports
+
+def get_all_reports():
+    """Fetches all scam reports stored in database."""
+    db_type, conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if db_type == "mysql":
+        cursor.execute("SELECT id, user_email, file_name, file_type, is_scam, confidence_score, category, transcript, recommendations, created_at FROM scam_reports ORDER BY created_at DESC")
+        rows = cursor.fetchall()
+        reports = [
+            {
+                "id": r[0], "userEmail": r[1], "fileName": r[2], "fileType": r[3],
+                "isScam": bool(r[4]), "confidenceScore": r[5], "category": r[6],
+                "transcript": r[7], "recommendations": json.loads(r[8]) if r[8] else [], "date": str(r[9])
+            } for r in rows
+        ]
+    else:
+        cursor.execute("SELECT id, user_email, file_name, file_type, is_scam, confidence_score, category, transcript, recommendations, created_at FROM scam_reports ORDER BY created_at DESC")
+        rows = cursor.fetchall()
+        reports = [
+            {
+                "id": r["id"], "userEmail": r["user_email"], "fileName": r["file_name"], "fileType": r["file_type"],
+                "isScam": bool(r["is_scam"]), "confidenceScore": r["confidence_score"], "category": r["category"],
+                "transcript": r["transcript"], "recommendations": json.loads(r["recommendations"]) if r["recommendations"] else [], "date": r["created_at"]
+            } for r in rows
+        ]
+
+    conn.close()
+    return reports
+

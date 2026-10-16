@@ -9,7 +9,7 @@ from typing import Optional, List
 from openai import OpenAI
 from dotenv import load_dotenv
 
-from database import init_db, register_user, login_user, get_all_users, save_report, get_reports_by_user
+from database import init_db, register_user, login_user, get_all_users, save_report, get_reports_by_user, get_all_reports
 
 load_dotenv()
 
@@ -318,6 +318,11 @@ async def chat_endpoint(request: ChatSchema):
 def save_report_endpoint(report: ReportSaveSchema):
     save_report(report.dict())
     return {"status": "success", "message": "Report saved to database"}
+
+@app.get("/api/reports")
+def get_all_reports_endpoint():
+    reports = get_all_reports()
+    return {"status": "success", "count": len(reports), "reports": reports}
 
 @app.get("/api/reports/{user_email}")
 def get_user_reports_endpoint(user_email: str):
