@@ -61,7 +61,17 @@ class ReportSaveSchema(BaseModel):
     transcript: Optional[str] = ""
     recommendations: List[str]
 
-# Health check
+# Root welcome & health checks
+@app.get("/")
+def root_endpoint():
+    return {
+        "status": "online",
+        "service": "ScamRadar AI Backend API",
+        "version": "2.0.0",
+        "docs": "/docs",
+        "health": "/api/health"
+    }
+
 @app.get("/api/health")
 def health_check():
     return {"status": "ok", "message": "ScamRadar FastAPI backend is running live"}
