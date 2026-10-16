@@ -111,15 +111,41 @@ def init_db():
 
     conn.close()
 
-    # Seed initial users in MySQL if not present
-    register_user("System Administrator", "admin@scamradar.com", "admin123", "admin")
+    # Ensure master admin exists with admin role and admin123 password
+    db_type, conn = get_db_connection()
+    cursor = conn.cursor()
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    if db_type == "mysql":
+        cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'admin@scamradar.com'")
+        if cursor.fetchone():
+            cursor.execute("UPDATE users SET password = %s, role = 'admin' WHERE LOWER(email) = 'admin@scamradar.com'", ("admin123",))
+        else:
+            cursor.execute("INSERT INTO users (name, email, password, role, created_at) VALUES (%s, %s, %s, %s, %s)",
+                           ("System Administrator", "admin@scamradar.com", "admin123", "admin", now_str))
+    else:
+        cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'admin@scamradar.com'")
+        if cursor.fetchone():
+            cursor.execute("UPDATE users SET password = ?, role = 'admin' WHERE LOWER(email) = 'admin@scamradar.com'", ("admin123",))
+        else:
+            cursor.execute("INSERT INTO users (name, email, password, role, created_at) VALUES (?, ?, ?, ?, ?)",
+                           ("System Administrator", "admin@scamradar.com", "admin123", "admin", now_str))
+    conn.commit()
+    conn.close()
+
+    # Seed demo enterprise user if not present
     register_user("Demo Enterprise User", "user@enterprise.com", "user123", "user")
 
 def register_user(name: str, email: str, password: str, role: str = "user"):
-    """Registers user in MySQL storing name, email, password, role."""
+    """Registers user in database. Strictly restricts admin account creation."""
+    clean_email = email.strip().lower()
+
+    # Prevent registering or overriding admin account
+    if clean_email == "admin@scamradar.com" or role == "admin":
+        return False, "Administrator accounts cannot be registered. Only the pre-configured System Administrator has admin access."
+
+    enforced_role = "user"
     db_type, conn = get_db_connection()
     cursor = conn.cursor()
-    clean_email = email.strip().lower()
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     try:
@@ -131,7 +157,7 @@ def register_user(name: str, email: str, password: str, role: str = "user"):
             
             cursor.execute(
                 "INSERT INTO users (name, email, password, role, created_at) VALUES (%s, %s, %s, %s, %s)",
-                (name, clean_email, password, role, now_str)
+                (name, clean_email, password, enforced_role, now_str)
             )
         else:
             cursor.execute("SELECT email FROM users WHERE LOWER(email) = ?", (clean_email,))
@@ -141,7 +167,7 @@ def register_user(name: str, email: str, password: str, role: str = "user"):
 
             cursor.execute(
                 "INSERT INTO users (name, email, password, role, created_at) VALUES (?, ?, ?, ?, ?)",
-                (name, clean_email, password, role, now_str)
+                (name, clean_email, password, enforced_role, now_str)
             )
 
         conn.commit()
@@ -152,7 +178,7 @@ def register_user(name: str, email: str, password: str, role: str = "user"):
         return False, str(e)
 
 def login_user(email: str, password: str):
-    """Authenticates user against MySQL database."""
+    """Authenticates user against database. Strictly limits admin role to admin@scamradar.com."""
     db_type, conn = get_db_connection()
     cursor = conn.cursor()
     clean_email = email.strip().lower()
@@ -178,6 +204,12 @@ def login_user(email: str, password: str):
 
     if u_pwd != password.strip():
         return False, "Invalid password", None
+
+    # Strictly guarantee only admin@scamradar.com holds the admin role
+    if clean_email == "admin@scamradar.com":
+        u_role = "admin"
+    else:
+        u_role = "user"
 
     return True, "Login successful", {"name": u_name, "email": u_email, "role": u_role}
 

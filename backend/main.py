@@ -93,11 +93,17 @@ def register_endpoint(user: RegisterSchema):
     if len(user.password.strip()) < 4:
         raise HTTPException(status_code=400, detail="Password must be at least 4 characters long.")
 
-    success, msg = register_user(user.name.strip(), clean_email, user.password.strip(), user.role or "user")
+    if clean_email == "admin@scamradar.com" or (user.role and user.role.lower() == "admin"):
+        raise HTTPException(
+            status_code=403, 
+            detail="Administrator accounts cannot be registered publicly. Only the pre-configured System Administrator has admin access."
+        )
+
+    success, msg = register_user(user.name.strip(), clean_email, user.password.strip(), "user")
     if not success:
         raise HTTPException(status_code=400, detail=msg)
     
-    return {"status": "success", "message": msg, "user": {"name": user.name, "email": clean_email, "role": user.role}}
+    return {"status": "success", "message": msg, "user": {"name": user.name, "email": clean_email, "role": "user"}}
 
 @app.post("/api/auth/login")
 def login_endpoint(user: LoginSchema):

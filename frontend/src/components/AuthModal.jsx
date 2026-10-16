@@ -14,6 +14,9 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
 
   const handleModeSwitch = (toLogin) => {
     setIsLoginMode(toLogin);
+    if (!toLogin) {
+      setSelectedRole('user');
+    }
     setErrorMessage('');
     setSuccessMessage('');
   };
@@ -47,16 +50,38 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
     const cleanName = authName.trim();
 
     if (isLoginMode) {
-      // 1. Admin shortcut check
-      if (cleanEmail === 'admin@scamradar.com' && cleanPassword === 'admin123') {
-        const adminObj = { email: cleanEmail, name: 'System Administrator', role: 'admin' };
+      // 1. If System Admin tab is selected
+      if (selectedRole === 'admin') {
+        if (cleanEmail !== 'admin@scamradar.com') {
+          setErrorMessage('Access Denied: Only the designated System Administrator (admin@scamradar.com) can access the Admin Portal.');
+          return;
+        }
+        if (cleanPassword !== 'admin123') {
+          setErrorMessage('Invalid administrator password. Access denied.');
+          return;
+        }
+        const adminObj = { email: 'admin@scamradar.com', name: 'System Administrator', role: 'admin' };
         setCurrentUser(adminObj);
         localStorage.setItem('scamradar_user', JSON.stringify(adminObj));
         onClose();
         return;
       }
 
-      // 2. Call backend login endpoint without modifying any backend code
+      // 2. If user enters admin credentials on the regular tab
+      if (cleanEmail === 'admin@scamradar.com') {
+        if (cleanPassword === 'admin123') {
+          const adminObj = { email: 'admin@scamradar.com', name: 'System Administrator', role: 'admin' };
+          setCurrentUser(adminObj);
+          localStorage.setItem('scamradar_user', JSON.stringify(adminObj));
+          onClose();
+          return;
+        } else {
+          setErrorMessage('Invalid administrator password.');
+          return;
+        }
+      }
+
+      // 3. Regular User Login via Backend
       try {
         const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
           method: 'POST',
@@ -75,12 +100,11 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
           throw new Error(data.detail || 'Invalid email or password.');
         }
 
-        // Apply selected role or returned role
-        const assignedRole = selectedRole === 'admin' ? 'admin' : (data.user?.role || 'user');
+        // All non-admin accounts strictly get role: 'user'
         const userObj = {
           email: cleanEmail,
-          name: data.user?.name || (assignedRole === 'admin' ? 'System Administrator' : 'Enterprise User'),
-          role: assignedRole
+          name: data.user?.name || 'Enterprise User',
+          role: 'user'
         };
 
         setCurrentUser(userObj);
@@ -90,9 +114,8 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
         // Fallback login check against registered users array in localStorage
         const existingUser = usersList.find(u => u.email.toLowerCase() === cleanEmail);
         if (!existingUser) {
-          // If demo user credentials typed
           if (cleanEmail === 'user@enterprise.com' && cleanPassword === 'user123') {
-            const userObj = { email: cleanEmail, name: 'Enterprise User', role: selectedRole };
+            const userObj = { email: cleanEmail, name: 'Enterprise User', role: 'user' };
             setCurrentUser(userObj);
             localStorage.setItem('scamradar_user', JSON.stringify(userObj));
             onClose();
@@ -107,18 +130,22 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
           return;
         }
 
-        const assignedRole = selectedRole === 'admin' ? 'admin' : (existingUser.role || 'user');
         const userObj = { 
           email: existingUser.email, 
           name: existingUser.name || 'User', 
-          role: assignedRole 
+          role: 'user' 
         };
         setCurrentUser(userObj);
         localStorage.setItem('scamradar_user', JSON.stringify(userObj));
         onClose();
       }
     } else {
-      // Registration Logic (role passed without changing backend code)
+      // Registration Logic - strictly regular User accounts only
+      if (cleanEmail === 'admin@scamradar.com') {
+        setErrorMessage('The email admin@scamradar.com is reserved. Administrator accounts cannot be registered publicly.');
+        return;
+      }
+
       if (cleanPassword.length < 4) {
         setErrorMessage('Password must be at least 4 characters long.');
         return;
@@ -129,10 +156,10 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            name: cleanName || (selectedRole === 'admin' ? 'Security Admin' : 'ScamRadar User'), 
+            name: cleanName || 'ScamRadar User', 
             email: cleanEmail, 
             password: cleanPassword, 
-            role: selectedRole 
+            role: 'user' 
           })
         });
         const textData = await res.text();
@@ -145,15 +172,16 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
         const newUser = { 
           email: cleanEmail, 
           password: cleanPassword, 
-          name: cleanName || (selectedRole === 'admin' ? 'Security Admin' : 'ScamRadar User'), 
-          role: selectedRole 
+          name: cleanName || 'ScamRadar User', 
+          role: 'user' 
         };
-        const updatedList = [...usersList, newUser];
+        const updatedList = [...usersList.filter(u => u.email.toLowerCase() !== cleanEmail), newUser];
         setUsersList(updatedList);
         localStorage.setItem('scamradar_registered_users', JSON.stringify(updatedList));
 
-        setSuccessMessage(`Account created successfully with ${selectedRole.toUpperCase()} permissions! You can now log in.`);
+        setSuccessMessage('Account created successfully! You can now sign in.');
         setIsLoginMode(true);
+        setSelectedRole('user');
         setAuthPassword('');
       } catch (err) {
         const emailExists = usersList.some(u => u.email.toLowerCase() === cleanEmail);
@@ -164,15 +192,16 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
         const newUser = { 
           email: cleanEmail, 
           password: cleanPassword, 
-          name: cleanName || (selectedRole === 'admin' ? 'Security Admin' : 'ScamRadar User'), 
-          role: selectedRole 
+          name: cleanName || 'ScamRadar User', 
+          role: 'user' 
         };
-        const updatedList = [...usersList, newUser];
+        const updatedList = [...usersList.filter(u => u.email.toLowerCase() !== cleanEmail), newUser];
         setUsersList(updatedList);
         localStorage.setItem('scamradar_registered_users', JSON.stringify(updatedList));
 
-        setSuccessMessage(`Account registered successfully as ${selectedRole.toUpperCase()}! You can now log in.`);
+        setSuccessMessage('Account registered successfully! You can now sign in.');
         setIsLoginMode(true);
+        setSelectedRole('user');
         setAuthPassword('');
       }
     }
@@ -204,51 +233,58 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
           </p>
         </div>
 
-        {/* ROLE SELECTION TABS (User Story: Select Role in Login/Register) */}
-        <div className="mb-5">
-          <label className="block text-[11px] font-mono uppercase tracking-wider font-bold text-gray-400 mb-2">
-            Select Your Role:
-          </label>
-          <div className="grid grid-cols-2 gap-2 bg-darkbg p-1.5 rounded-xl border border-gray-800">
-            {/* User Role Button */}
-            <button
-              type="button"
-              onClick={() => handleRoleChange('user')}
-              className={`py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
-                selectedRole === 'user'
-                  ? 'bg-accent text-darkbg shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-              }`}
-            >
-              <i className="fa-solid fa-user text-xs"></i>
-              <span>Regular User</span>
-            </button>
+        {/* ROLE SELECTION TABS - Only displayed in Login Mode */}
+        {isLoginMode ? (
+          <div className="mb-5">
+            <label className="block text-[11px] font-mono uppercase tracking-wider font-bold text-gray-400 mb-2">
+              Select Your Role:
+            </label>
+            <div className="grid grid-cols-2 gap-2 bg-darkbg p-1.5 rounded-xl border border-gray-800">
+              {/* User Role Button */}
+              <button
+                type="button"
+                onClick={() => handleRoleChange('user')}
+                className={`py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
+                  selectedRole === 'user'
+                    ? 'bg-accent text-darkbg shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+                }`}
+              >
+                <i className="fa-solid fa-user text-xs"></i>
+                <span>Regular User</span>
+              </button>
 
-            {/* Admin Role Button */}
-            <button
-              type="button"
-              onClick={() => handleRoleChange('admin')}
-              className={`py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
-                selectedRole === 'admin'
-                  ? 'bg-danger text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-              }`}
-            >
-              <i className="fa-solid fa-shield-halved text-xs"></i>
-              <span>System Admin</span>
-            </button>
-          </div>
+              {/* Admin Role Button */}
+              <button
+                type="button"
+                onClick={() => handleRoleChange('admin')}
+                className={`py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
+                  selectedRole === 'admin'
+                    ? 'bg-danger text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+                }`}
+              >
+                <i className="fa-solid fa-shield-halved text-xs"></i>
+                <span>System Admin</span>
+              </button>
+            </div>
 
-          {/* Role Description Notice */}
-          <div className="mt-2 text-[11px] text-gray-400 flex items-center gap-1.5">
-            <i className={`fa-solid ${selectedRole === 'admin' ? 'fa-triangle-exclamation text-danger' : 'fa-circle-info text-accent'}`}></i>
-            <span>
-              {selectedRole === 'admin' 
-                ? 'Admin: Access full SOC incident telemetry & report logs.' 
-                : 'User: Upload evidence, run AI scans, and track personal cases.'}
-            </span>
+            {/* Role Description Notice */}
+            <div className="mt-2 text-[11px] text-gray-400 flex items-center gap-1.5">
+              <i className={`fa-solid ${selectedRole === 'admin' ? 'fa-triangle-exclamation text-danger' : 'fa-circle-info text-accent'}`}></i>
+              <span>
+                {selectedRole === 'admin' 
+                  ? 'Admin: Authorized administrative credentials required.' 
+                  : 'User: Upload evidence, run AI scans, and track personal cases.'}
+              </span>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="mb-5 p-3.5 bg-darkbg/80 border border-gray-800 rounded-xl flex items-center gap-2.5 text-xs text-gray-300">
+            <i className="fa-solid fa-user-shield text-accent text-sm shrink-0"></i>
+            <span>Registering for a <strong>Standard User Account</strong>. Administrator accounts are pre-provisioned and cannot be registered publicly.</span>
+          </div>
+        )}
 
         {/* Alerts */}
         {successMessage && (
@@ -275,7 +311,7 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
                 required 
                 value={authName} 
                 onChange={e => setAuthName(e.target.value)} 
-                placeholder={selectedRole === 'admin' ? "Admin Officer" : "Jane Doe"} 
+                placeholder="Jane Doe" 
                 className="w-full bg-darkbg border border-gray-700/80 rounded-xl px-4 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-accent transition" 
               />
             </div>
@@ -288,7 +324,7 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
               required 
               value={authEmail} 
               onChange={e => setAuthEmail(e.target.value)} 
-              placeholder={selectedRole === 'admin' ? "admin@scamradar.com" : "user@enterprise.com"} 
+              placeholder={isLoginMode && selectedRole === 'admin' ? "admin@scamradar.com" : "user@enterprise.com"} 
               className="w-full bg-darkbg border border-gray-700/80 rounded-xl px-4 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-accent transition" 
             />
           </div>
@@ -308,13 +344,13 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
           <button 
             type="submit" 
             className={`w-full font-extrabold py-3.5 rounded-xl shadow-lg transition mt-4 cursor-pointer text-xs uppercase tracking-wider flex items-center justify-center gap-2 ${
-              selectedRole === 'admin'
+              isLoginMode && selectedRole === 'admin'
                 ? 'bg-danger hover:bg-red-600 text-white shadow-danger/30'
                 : 'bg-accent hover:bg-accenthover text-darkbg shadow-accent/30'
             }`}
           >
             <i className={`fa-solid ${isLoginMode ? 'fa-arrow-right-to-bracket' : 'fa-user-plus'}`}></i>
-            <span>{isLoginMode ? `Sign In as ${selectedRole.toUpperCase()}` : `Register as ${selectedRole.toUpperCase()}`}</span>
+            <span>{isLoginMode ? (selectedRole === 'admin' ? 'Sign In as System Admin' : 'Sign In as Regular User') : 'Register Account'}</span>
           </button>
         </form>
         
