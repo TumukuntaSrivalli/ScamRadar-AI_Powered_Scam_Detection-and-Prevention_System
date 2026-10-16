@@ -33,7 +33,7 @@ def on_startup():
 api_key = os.getenv("OPENROUTER_API_KEY", "")
 ai_client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key=api_key
+    api_key=api_key or "sk-dummy-init-key"
 )
 
 # Pydantic Schemas

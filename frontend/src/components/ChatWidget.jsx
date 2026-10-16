@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { API_BASE_URL } from '../apiConfig';
 
 export default function ChatWidget({ currentUser }) {
   const [chatOpen, setChatOpen] = useState(false);
@@ -40,7 +41,7 @@ export default function ChatWidget({ currentUser }) {
     setIsChatLoading(true);
 
     try {
-      const response = await fetch('/api/analyze/chat', {
+      const response = await fetch(`${API_BASE_URL}/api/analyze/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: message })

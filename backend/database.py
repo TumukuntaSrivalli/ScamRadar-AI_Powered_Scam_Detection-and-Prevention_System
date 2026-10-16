@@ -15,8 +15,11 @@ DB_USER = os.getenv("DB_USER", "root")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "Srivalli@2007")
 DB_NAME = os.getenv("DB_NAME", "scamradar")
 
-# Local SQLite fallback path if needed
-SQLITE_DB_PATH = os.path.join(os.path.dirname(__file__), "scamradar.db")
+# Local SQLite fallback path (uses /tmp on serverless environments like Vercel)
+if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+    SQLITE_DB_PATH = "/tmp/scamradar.db"
+else:
+    SQLITE_DB_PATH = os.path.join(os.path.dirname(__file__), "scamradar.db")
 
 def get_db_connection():
     """Connect to MySQL database server, creating database if needed."""

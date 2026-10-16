@@ -11,6 +11,7 @@ import AuthModal from './components/AuthModal';
 import BlogsModal from './components/BlogsModal';
 import ArticleModal from './components/ArticleModal';
 import ChatWidget from './components/ChatWidget';
+import { API_BASE_URL } from './apiConfig';
 
 import defaultUsers from './data/registered_users.json';
 import defaultReports from './data/initial_reports.json';
@@ -113,8 +114,8 @@ export default function ScamRadarApp() {
     formData.append("file", selectedFile);
 
     const endpoint = selectedFileType === 'image' 
-      ? '/api/analyze/image' 
-      : '/api/analyze/audio';
+      ? `${API_BASE_URL}/api/analyze/image` 
+      : `${API_BASE_URL}/api/analyze/audio`;
 
     try {
       const response = await fetch(endpoint, {
@@ -127,11 +128,11 @@ export default function ScamRadarApp() {
       try {
         data = responseText ? JSON.parse(responseText) : {};
       } catch (parseErr) {
-        throw new Error("Invalid response format received from backend server.");
+        throw new Error(`Backend server error (HTTP ${response.status} ${response.statusText || 'Error'}). The backend did not return JSON. Please ensure the backend server is running and reachable.`);
       }
       
       if (!response.ok) {
-        throw new Error(data.detail || "Analysis request failed.");
+        throw new Error(data.detail || `Analysis request failed with status ${response.status}.`);
       }
 
       setAnalysisResult(data);
@@ -154,7 +155,7 @@ export default function ScamRadarApp() {
       setReportsList(prev => [newReport, ...prev]);
 
       // Save to backend DB without altering backend contract
-      fetch('/api/reports/save', {
+      fetch(`${API_BASE_URL}/api/reports/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -32,8 +32,8 @@ export default function AnalysisReport({
               <i className="fa-solid fa-circle-xmark"></i> Analysis Request Failed
             </h3>
             <p className="mt-1 text-gray-300 text-xs">{analysisError || "Could not connect to ScamRadar backend API."}</p>
-            <p className="mt-2 text-[11px] text-gray-400 border-t border-danger/20 pt-2">
-              <strong>Tip:</strong> Ensure your FastAPI backend server is running locally on <code className="text-accent">http://127.0.0.1:8000</code>.
+            <p className="mt-2 text-[11px] text-gray-400 border-t border-danger/20 pt-2 leading-relaxed">
+              <strong>Tip:</strong> If running locally, ensure your FastAPI backend is running on <code className="text-accent">http://127.0.0.1:8000</code>. If running on Vercel, ensure your backend server URL is configured via <code className="text-accent">VITE_API_URL</code> or your serverless API routes are deployed.
             </p>
           </div>
         )}
