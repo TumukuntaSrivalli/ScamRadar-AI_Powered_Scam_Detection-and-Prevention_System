@@ -4,6 +4,8 @@ import json
 import hashlib
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from openai import OpenAI
@@ -14,6 +16,17 @@ from database import init_db, register_user, login_user, get_all_users, save_rep
 load_dotenv()
 
 app = FastAPI(title="ScamRadar AI Backend", version="2.0.0")
+
+# Resolve static frontend distribution directory
+possible_dist_dirs = [
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "dist")),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "frontend", "dist")),
+]
+FRONTEND_DIST = next((d for d in possible_dist_dirs if os.path.exists(d)), None)
+
+if FRONTEND_DIST and os.path.exists(os.path.join(FRONTEND_DIST, "assets")):
+    app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIST, "assets")), name="assets")
 
 # Enable CORS for frontend connection
 app.add_middleware(
@@ -64,6 +77,10 @@ class ReportSaveSchema(BaseModel):
 # Root welcome & health checks
 @app.get("/")
 def root_endpoint():
+    if FRONTEND_DIST:
+        index_file = os.path.join(FRONTEND_DIST, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file)
     return {
         "status": "online",
         "service": "ScamRadar AI Backend API",
@@ -71,6 +88,17 @@ def root_endpoint():
         "docs": "/docs",
         "health": "/api/health"
     }
+
+@app.get("/logo.jpg")
+def serve_logo():
+    if FRONTEND_DIST:
+        logo_path = os.path.join(FRONTEND_DIST, "logo.jpg")
+        if os.path.isfile(logo_path):
+            return FileResponse(logo_path)
+    root_logo = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "logo.jpg"))
+    if os.path.isfile(root_logo):
+        return FileResponse(root_logo)
+    raise HTTPException(status_code=404, detail="Logo not found")
 
 @app.get("/api/health")
 def health_check():
@@ -328,3 +356,20 @@ def get_all_reports_endpoint():
 def get_user_reports_endpoint(user_email: str):
     reports = get_reports_by_user(user_email)
     return {"status": "success", "reports": reports}
+
+# SPA fallback for all frontend client routes
+@app.get("/{full_path:path}")
+def serve_frontend_spa(full_path: str):
+    if full_path.startswith("api/") or full_path in ["docs", "redoc", "openapi.json"]:
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+    
+    if FRONTEND_DIST:
+        direct_file = os.path.join(FRONTEND_DIST, full_path)
+        if os.path.isfile(direct_file):
+            return FileResponse(direct_file)
+        
+        index_file = os.path.join(FRONTEND_DIST, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file)
+
+    raise HTTPException(status_code=404, detail="Page not found")
