@@ -1,6 +1,21 @@
 import React, { useState } from 'react';
 import { API_BASE_URL } from '../apiConfig';
 
+const isValidEmail = (email) => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
+
+const validatePassword = (password) => {
+  if (!password || password.length < 6) {
+    return 'Password must be at least 6 characters long.';
+  }
+  if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+    return 'Password must contain both letters and numbers.';
+  }
+  return null;
+};
+
 export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, setUsersList, initialRole = 'user' }) {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [selectedRole, setSelectedRole] = useState(initialRole || 'user'); // 'user' or 'admin'
@@ -48,6 +63,21 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
     const cleanEmail = authEmail.trim().toLowerCase();
     const cleanPassword = authPassword.trim();
     const cleanName = authName.trim();
+
+    if (!cleanEmail) {
+      setErrorMessage('Please enter your email address.');
+      return;
+    }
+
+    if (!isValidEmail(cleanEmail)) {
+      setErrorMessage('Please enter a valid email address (e.g. name@example.com).');
+      return;
+    }
+
+    if (!cleanPassword) {
+      setErrorMessage('Please enter your password.');
+      return;
+    }
 
     if (isLoginMode) {
       // 1. If System Admin tab is selected
@@ -141,13 +171,19 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
       }
     } else {
       // Registration Logic - strictly regular User accounts only
+      if (!cleanName) {
+        setErrorMessage('Please enter your full name.');
+        return;
+      }
+
       if (cleanEmail === 'admin@scamradar.com') {
         setErrorMessage('The email admin@scamradar.com is reserved. Administrator accounts cannot be registered publicly.');
         return;
       }
 
-      if (cleanPassword.length < 4) {
-        setErrorMessage('Password must be at least 4 characters long.');
+      const passwordError = validatePassword(cleanPassword);
+      if (passwordError) {
+        setErrorMessage(passwordError);
         return;
       }
 
@@ -339,6 +375,12 @@ export default function AuthModal({ isOpen, onClose, setCurrentUser, usersList, 
               placeholder="••••••••" 
               className="w-full bg-darkbg border border-gray-700/80 rounded-xl px-4 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-accent transition" 
             />
+            {!isLoginMode && (
+              <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
+                <i className="fa-solid fa-circle-info text-accent text-[10px]"></i>
+                <span>At least 6 characters with both letters &amp; numbers</span>
+              </p>
+            )}
           </div>
           
           <button 

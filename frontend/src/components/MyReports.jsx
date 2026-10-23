@@ -168,9 +168,41 @@ export default function MyReports({ reportsList, currentUser, onDeleteReport }) 
                 </p>
               </div>
 
+              {selectedReportModal.explanation && (
+                <div>
+                  <h4 className="font-bold text-white mb-1.5 uppercase text-[11px] flex items-center gap-1.5">
+                    <i className="fa-solid fa-brain text-accent"></i> AI Threat Assessment & Risk Reasoning
+                  </h4>
+                  <div className={`p-3.5 rounded-xl border leading-relaxed text-xs ${
+                    selectedReportModal.isScam 
+                      ? 'bg-danger/10 border-danger/25 text-gray-200' 
+                      : 'bg-emerald-500/10 border-emerald-500/25 text-gray-200'
+                  }`}>
+                    <p>{selectedReportModal.explanation}</p>
+                  </div>
+                </div>
+              )}
+
+              {selectedReportModal.redFlags && selectedReportModal.redFlags.length > 0 && (
+                <div>
+                  <h4 className="font-bold text-white mb-2 uppercase text-[11px] flex items-center gap-1.5">
+                    <i className={`fa-solid ${selectedReportModal.isScam ? 'fa-flag text-danger' : 'fa-circle-check text-accent'}`}></i>
+                    {selectedReportModal.isScam ? 'Detected Threat Indicators & Red Flags' : 'Safety Verification Points'}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {selectedReportModal.redFlags.map((flag, i) => (
+                      <div key={i} className="bg-darkbg/80 border border-gray-800 p-2.5 rounded-lg text-xs text-gray-300 flex items-start gap-2">
+                        <i className={`fa-solid ${selectedReportModal.isScam ? 'fa-circle-exclamation text-danger' : 'fa-check text-accent'} text-xs mt-0.5 shrink-0`}></i>
+                        <span>{flag}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {selectedReportModal.transcript && (
                 <div>
-                  <h4 className="font-bold text-white mb-1 uppercase text-[11px]">Transcript / OCR Details</h4>
+                  <h4 className="font-bold text-white mb-1 uppercase text-[11px]">Transcript / Audio Content</h4>
                   <p className="italic text-gray-400 bg-darkbg p-3 rounded border border-gray-800">
                     "{selectedReportModal.transcript}"
                   </p>
@@ -178,10 +210,17 @@ export default function MyReports({ reportsList, currentUser, onDeleteReport }) 
               )}
 
               <div>
-                <h4 className="font-bold text-white mb-2 uppercase text-[11px]">Safety Recommendations</h4>
-                <ul className="list-disc list-inside space-y-1.5 bg-darkbg p-3 rounded border border-gray-800">
+                <h4 className="font-bold text-white mb-2 uppercase text-[11px] flex items-center gap-1.5">
+                  <i className="fa-solid fa-list-check text-accent"></i> Actionable Recommendations
+                </h4>
+                <ul className="space-y-1.5 bg-darkbg p-3 rounded-xl border border-gray-800 text-xs text-gray-300">
                   {selectedReportModal.recommendations?.map((rec, i) => (
-                    <li key={i}>{rec}</li>
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-accent/15 text-accent flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                        {i + 1}
+                      </span>
+                      <span>{rec}</span>
+                    </li>
                   )) || <li>No specific recommendations available.</li>}
                 </ul>
               </div>

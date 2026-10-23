@@ -89,7 +89,7 @@ export default function AnalysisReport({
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-300 border-t border-gray-800/80 pt-3">
               <div>
                 <p><strong>Confidence Score:</strong> <span className="text-white font-mono font-bold text-sm">{analysisResult.analysis?.confidence_score ?? 90}%</span></p>
-                <p className="mt-1"><strong>Category:</strong> <span className="text-accent font-semibold">{analysisResult.analysis?.category ?? 'Fraud Pattern'}</span></p>
+                <p className="mt-1"><strong>Threat Category:</strong> <span className="text-accent font-semibold">{analysisResult.analysis?.category ?? 'Fraud Pattern'}</span></p>
               </div>
 
               {analysisResult.transcript && (
@@ -102,20 +102,67 @@ export default function AnalysisReport({
               )}
             </div>
 
-            {/* Safety Recommendations (US 6) */}
+            {/* AI Forensic Threat Explanation & Risk Reasoning */}
+            {(analysisResult.analysis?.explanation || analysisResult.analysis?.reasoning) && (
+              <div className="mt-5 border-t border-gray-800/80 pt-4">
+                <h4 className="font-bold text-white text-xs mb-2 uppercase flex items-center gap-1.5 tracking-wider">
+                  <i className="fa-solid fa-brain text-accent"></i> AI Threat Assessment & Risk Reasoning:
+                </h4>
+                <div className={`p-4 rounded-xl border leading-relaxed text-xs space-y-2 ${
+                  analysisResult.analysis?.is_scam 
+                    ? 'bg-danger/10 border-danger/25 text-gray-200' 
+                    : 'bg-emerald-500/10 border-emerald-500/25 text-gray-200'
+                }`}>
+                  <p className="font-sans leading-relaxed">
+                    {analysisResult.analysis?.explanation || analysisResult.analysis?.reasoning}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Key Detected Indicators & Red Flags */}
+            {analysisResult.analysis?.red_flags && analysisResult.analysis.red_flags.length > 0 && (
+              <div className="mt-5 border-t border-gray-800/80 pt-4">
+                <h4 className="font-bold text-white text-xs mb-2 uppercase flex items-center gap-1.5 tracking-wider">
+                  <i className={`fa-solid ${analysisResult.analysis?.is_scam ? 'fa-flag text-danger' : 'fa-circle-check text-accent'}`}></i>
+                  {analysisResult.analysis?.is_scam ? 'Key Red Flags & Threat Indicators Detected:' : 'Safety Verification Points:'}
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                  {analysisResult.analysis.red_flags.map((flag, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`p-2.5 rounded-lg border flex items-start gap-2.5 text-xs ${
+                        analysisResult.analysis?.is_scam 
+                          ? 'bg-darkbg/70 border-red-500/20 text-gray-300' 
+                          : 'bg-darkbg/70 border-emerald-500/20 text-gray-300'
+                      }`}
+                    >
+                      <i className={`fa-solid ${analysisResult.analysis?.is_scam ? 'fa-circle-exclamation text-danger' : 'fa-check text-accent'} text-xs mt-0.5 shrink-0`}></i>
+                      <span className="leading-snug">{flag}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Safety Action Plan & Recommendations (US 6) */}
             <div className="mt-5 border-t border-gray-800/80 pt-4">
-              <h4 className="font-bold text-white text-xs mb-2 uppercase flex items-center gap-1.5">
-                <i className="fa-solid fa-list-check text-accent"></i> Safety Action Plan & Recommendations:
+              <h4 className="font-bold text-white text-xs mb-2 uppercase flex items-center gap-1.5 tracking-wider">
+                <i className="fa-solid fa-list-check text-accent"></i> Actionable Safety Recommendations & Preventive Defense:
               </h4>
 
               {analysisResult.analysis?.recommendations && analysisResult.analysis.recommendations.length > 0 ? (
-                <ul className="list-disc list-inside text-xs text-gray-300 space-y-1.5 bg-darkbg/50 p-3 rounded-lg border border-gray-800">
+                <ul className="text-xs text-gray-300 space-y-2 bg-darkbg/60 p-3.5 rounded-xl border border-gray-800">
                   {analysisResult.analysis.recommendations.map((tip, idx) => (
-                    <li key={idx} className="leading-relaxed">{tip}</li>
+                    <li key={idx} className="flex items-start gap-2.5 leading-relaxed">
+                      <span className="w-5 h-5 rounded-full bg-accent/15 text-accent border border-accent/30 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                        {idx + 1}
+                      </span>
+                      <span>{tip}</span>
+                    </li>
                   ))}
                 </ul>
               ) : (
-                /* Acceptance Criterion 2 of US 6: Fallback message when no recommendation is available */
                 <p className="text-xs text-gray-400 italic bg-darkbg/50 p-3 rounded-lg border border-gray-800">
                   No specific safety recommendations available for this scan. Always exercise caution and never share OTPs or passwords.
                 </p>

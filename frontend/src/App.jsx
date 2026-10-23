@@ -149,6 +149,8 @@ export default function ScamRadarApp() {
         isScam: data.analysis?.is_scam ?? true,
         confidenceScore: data.analysis?.confidence_score ?? 92,
         category: data.analysis?.category ?? (selectedFileType === 'image' ? 'WhatsApp Phishing' : 'Voice Scam'),
+        explanation: data.analysis?.explanation || null,
+        redFlags: data.analysis?.red_flags || [],
         transcript: data.transcript || null,
         recommendations: data.analysis?.recommendations || []
       };
@@ -167,6 +169,8 @@ export default function ScamRadarApp() {
           is_scam: newReport.isScam,
           confidence_score: newReport.confidenceScore,
           category: newReport.category,
+          explanation: newReport.explanation || "",
+          red_flags: newReport.redFlags || [],
           transcript: newReport.transcript || "",
           recommendations: newReport.recommendations
         })

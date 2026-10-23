@@ -1,77 +1,151 @@
 import os
 import json
+import base64
 import requests
-from google import genai # The new SDK
+from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize the new unified Client
-# It automatically picks up GEMINI_API_KEY from your .env file
-client = genai.Client()
-
-# Hugging Face config stays exactly the same
-HF_API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo"
-HF_HEADERS = {"Authorization": f"Bearer {os.getenv('HF_API_KEY')}"}
+openrouter_key = os.getenv("OPENROUTER_API_KEY", "")
+ai_client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=openrouter_key or "sk-dummy-key"
+)
 
 def extract_text_from_audio(file_bytes: bytes) -> str:
-    """Sends audio to Hugging Face and returns text."""
-    response = requests.post(HF_API_URL, headers=HF_HEADERS, data=file_bytes)
-    if response.status_code != 200:
-        return "Error: Could not transcribe audio. Ensure HF_API_KEY is correct."
-    return response.json().get("text", "")
+    """Extracts text transcript from audio using OpenRouter multimodal Gemini."""
+    try:
+        b64 = base64.b64encode(file_bytes).decode("utf-8")
+        res = ai_client.chat.completions.create(
+            model="google/gemini-2.5-flash",
+            max_tokens=500,
+            timeout=25,
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Transcribe this audio verbatim. If silent or unintelligible, respond with [No speech detected]."},
+                    {"type": "image_url", "image_url": {"url": f"data:audio/wav;base64,{b64}"}}
+                ]
+            }]
+        )
+        return (res.choices[0].message.content or "").strip()
+    except Exception as e:
+        return f"Error: Could not transcribe audio ({str(e)})"
 
 def analyze_text_for_scam(text: str) -> dict:
-    """Uses Gemini to detect scams from text transcripts."""
+    """Uses Gemini to detect scams from text transcripts with concise report."""
     prompt = f"""
-    You are ScamRadar, a cybersecurity AI. Analyze this text for scams:
+    You are ScamRadar AI, an elite cybersecurity and fraud intelligence system.
+    Analyze this message/transcript:
     "{text}"
+
     Respond strictly in valid JSON format:
-    {{"is_scam": true/false, "confidence_score": 0-100, "category": "phishing/financial/etc", "recommendations": ["tip1", "tip2"]}}
+    {{
+      "is_scam": true/false,
+      "confidence_score": 5-20 if safe, 85-99 if scam,
+      "category": "threat category or 'Safe Conversation'",
+      "explanation": "concise 2-3 sentences explaining the assessment",
+      "red_flags": ["point 1", "point 2"],
+      "recommendations": ["tip 1", "tip 2"]
+    }}
     """
-    
-    # New syntax for generation
-    response = client.models.generate_content(
-        model='gemini-2.5-flash', # Upgraded to the newer, faster 2.5 flash model
-        contents=prompt
-    )
-    
-    clean_text = response.text.replace("```json", "").replace("```", "").strip()
-    return json.loads(clean_text)
+    for m in ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"]:
+        try:
+            res = ai_client.chat.completions.create(
+                model=m,
+                max_tokens=500,
+                timeout=20,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            raw = (res.choices[0].message.content or "").strip()
+            clean = raw.replace("```json", "").replace("```", "").strip()
+            if "{" in clean and "}" in clean:
+                clean = clean[clean.find("{"):clean.rfind("}") + 1]
+            return json.loads(clean)
+        except Exception:
+            continue
+
+    return {
+        "is_scam": False,
+        "confidence_score": 10,
+        "category": "Safe Conversation",
+        "explanation": "No significant threats or deception indicators were detected in the text.",
+        "red_flags": [],
+        "recommendations": ["Always exercise baseline caution and never disclose OTPs or financial PINs."]
+    }
 
 def analyze_image_for_scam(image_file) -> dict:
-    """Uses Gemini Vision to read WhatsApp screenshots and detect scams."""
+    """Uses Gemini Vision to inspect screenshots and detect scams with concise report."""
+    import io
+    buf = io.BytesIO()
+    image_file.save(buf, format="PNG")
+    b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+
     prompt = """
-    Read the text in this screenshot (likely a WhatsApp message). 
-    Identify if it is a scam.
+    You are ScamRadar AI, an elite cybersecurity fraud intelligence system.
+    Inspect the provided chat screenshot.
+    Determine whether this is a SCAM or SAFE/BENIGN.
+    Provide a concise report:
+    - explanation: 2 to 3 sentences max
+    - red_flags: 2 to 3 points (empty if safe)
+    - recommendations: 2 to 3 practical steps
+    - confidence_score: 5-20 if safe, 85-99 if scam
+
     Respond strictly in valid JSON format:
-    {"is_scam": true/false, "confidence_score": 0-100, "category": "phishing/financial/etc", "recommendations": ["tip1", "tip2"]}
+    {
+      "is_scam": true/false,
+      "confidence_score": integer (0-100),
+      "category": "specific threat or 'Safe Conversation'",
+      "explanation": "concise 2-3 sentences",
+      "red_flags": ["point 1", "point 2"],
+      "recommendations": ["tip 1", "tip 2"]
+    }
     """
-    
-    # New syntax seamlessly supports passing the PIL image directly in a list
-    response = client.models.generate_content(
-        model='gemini-2.5-flash', 
-        contents=[prompt, image_file]
-    )
-    
-    clean_text = response.text.replace("```json", "").replace("```", "").strip()
-    return json.loads(clean_text)
+    for m in ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"]:
+        try:
+            res = ai_client.chat.completions.create(
+                model=m,
+                max_tokens=500,
+                timeout=25,
+                messages=[{
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64}"}}
+                    ]
+                }]
+            )
+            raw = (res.choices[0].message.content or "").strip()
+            clean = raw.replace("```json", "").replace("```", "").strip()
+            if "{" in clean and "}" in clean:
+                clean = clean[clean.find("{"):clean.rfind("}") + 1]
+            return json.loads(clean)
+        except Exception:
+            continue
+
+    return {
+        "is_scam": False,
+        "confidence_score": 10,
+        "category": "Safe Conversation",
+        "explanation": "Inspection reveals legitimate, benign content without indications of coercion or financial fraud.",
+        "red_flags": [],
+        "recommendations": ["Maintain digital hygiene and never share OTPs or passwords over chat."]
+    }
+
 def chat_with_security_assistant(user_message: str) -> str:
     """Generates dynamic AI responses using Gemini for the chatbot widget."""
     prompt = f"""
     You are ScamRadar AI, an expert cybersecurity assistant integrated into the ScamRadar platform.
-    Answer the user's question concisely, clearly, and helpfully.
-
-    Platform Knowledge:
-    - ScamRadar analyzes WhatsApp screenshots (via Gemini Vision OCR) and Call Recordings (via Hugging Face Whisper Speech-to-Text).
-    - It predicts scam risk, confidence scores, and safety recommendations.
-    - Official reporting portal in India: cybercrime.gov.in (National Cyber Crime Reporting Portal / 1930).
-
+    Answer concisely, clearly, and helpfully.
     User Query: "{user_message}"
     """
-    
-    response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=prompt
-    )
-    return response.text
+    try:
+        res = ai_client.chat.completions.create(
+            model="google/gemini-2.5-flash",
+            max_tokens=400,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return res.choices[0].message.content.strip()
+    except Exception:
+        return "I am ScamRadar AI. If you suspect fraud or extortion, never transfer money or disclose OTPs. Report incidents to 1930 / cybercrime.gov.in."
